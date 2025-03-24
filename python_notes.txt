@@ -1,0 +1,4 @@
+//Python check for <NA> value
+if gnis_id is pd.NA:
+    gnis_id = 0
+
