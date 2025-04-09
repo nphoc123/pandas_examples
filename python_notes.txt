@@ -2,4 +2,142 @@
 if gnis_id is pd.NA:
     gnis_id = 0
 
+//geopandas convert a geometry to esri path
+for idx, row in test_gdf.itterows():
+    geom = row['geometry'] //row['geometry'] is MultiLineString shapely geometry object.
+    print(geom)  //this will print out WKT of the geom MULTILINESTRING format
+    print(geom.wkt) // also print out WKT of the geom MULTILINESTRING
 
+    //get ESRI Polyline geometry's path
+    for line in row['geometry'].geoms:
+        print(f"line coords: {list(line.coords)}")
+        path = [list(coord) for coord in line.coords]
+        print(f"Path: {path}")
+
+//get spatial reference number of the geopandas dataframe
+test_gdf.crs.to_epsg() //return 3857 for web mercator
+
+//arcgis api for Python
+
+ def query_candidates(self, lyr_url: str, pt_geom: Geometry, search_tolerance: float, 
+                         selection_type: str="", out_wiki: int=config.WKID_WEBMERCATOR):
+        return_features = []
+        # project input point to NAD83 ALBERS
+        pt_nad83_albers = pt_geom.project_as(config.WKID_ALBERS_NAD83)
+        # buffer point with search 
+        buffer_pt = pt_nad83_albers.buffer(search_tolerance)
+        # project point buffer back to GCSNAD83
+        buffer_pt_gcsnad83 = buffer_pt.project_as(config.WKID_GCSNAD83)
+        query_filter = intersects(buffer_pt_gcsnad83, sr=self._wkid_gcs_nad83)
+        feature_layer = FeatureLayer(lyr_url)
+        results: FeatureSet = feature_layer.query(
+            geometry_filter=query_filter,
+            out_fields="objectid, permanent_identifier, reachcode",
+            out_sr={out_wiki},
+        )
+        features = results.features
+        geometry_type = results.geometry_type
+        for feature in features:
+            if geometry_type == 'Polyline':
+                if selection_type == config.SELECTION_TYPE_EXPLICIT:
+                    return_features.append(feature)
+                elif selection_type == config.TOPDOWNSTREAM:
+                    # if geometry is None or empty
+                    feature_geom: Geometry = feature.geometry
+                    if feature_geom is None or feature_geom.is_empty:
+                        raise Exception(f"")
+                    # else 
+                    feature.geometry
+            elif geometry_type == 'Polygon':
+                pass
+            else:
+                pass
+        
+
+        return return_features
+
+//sqlite
+//python doc named tuple sqlite access csv file and query it
+https://docs.python.org/3/library/collections.html#collections.namedtuple
+
+EmployeeRecord = namedtuple('EmployeeRecord', 'name, age, title, department, paygrade')
+
+import csv
+for emp in map(EmployeeRecord._make, csv.reader(open("employees.csv", "rb"))):
+    print(emp.name, emp.title)
+
+import sqlite3
+conn = sqlite3.connect('/companydata')
+cursor = conn.cursor()
+cursor.execute('SELECT name, age, title, department, paygrade FROM employees')
+for emp in map(EmployeeRecord._make, cursor.fetchall()):
+    print(emp.name, emp.title)
+
+//query a dataframe
+df1 = df[df[column_name] = value]
+
+//query the record of gdf with a string containing a value. This is a like query
+gdf[gdf[column_name].str.contains.('Thuy')]
+
+//query a dataframe to get null records
+df[df[column_name].isnull()]
+
+//query a dataframe to get not null records 
+df[df[column_name].notnull()]
+
+//query select between
+df[(df['age']) > 25 & (df['age'] < 50)]
+
+//Vectorized operations are the fastest and most efficient approach in Pandas. They are preferred when the operations can be applied directly to 
+//entire columns or datasets without row-wise iteration. Vectorized operations are not considered row-wise iteration in the traditional sense, 
+//but they can achieve the same end goal without explicit iteration.
+
+//gdf to check for null
+    if not UID in gdf.columns:
+        raise KeyError(f"{UID} is missing")
+    if not gdf[UID].is_unique:
+        raise ValueError(f"{UID} is not unique")
+    if not is_string_dtype(gdf[UID]):
+        raise TypeError(f"{UID} is not a string data type")
+    if gdf[UID].isnull().sum(): why?
+        raise ValueError(f"{UID} contains null values")
+    if (gdf[UID] == "").sum(): 
+        raise ValueError(f"{UID} contains empty strings")
+		
+//loop through line gdf
+fld_names = [index_field, "geometry"]
+for line in lines.itertuples():
+	geom = line.geometry
+	
+//sjoin_nearest sample
+from shapely import Point
+
+points = gpd.GeoDataFrame(
+    {"point": [*"AB"]},
+    geometry=gpd.points_from_xy(*zip(*[A, B])),
+    crs=road.crs,
+)
+nodes = gpd.GeoDataFrame(
+    {"node": G.nodes},
+    geometry=list(map(Point, G.nodes)),
+    crs=road.crs,
+)
+
+njoin = nodes.sjoin_nearest(points.assign(coo=[A, B]), distance_col="dis")
+min_dis = njoin.loc[njoin.groupby("point")["dis"].idxmin()]
+
+for u, v, d in zip(
+    min_dis["node"], min_dis["coo"], min_dis["dis"],
+): G.add_edge(u, v, mm_len=d)
+
+a_to_b = nx.shortest_path(
+    G, source=A, target=B, weight="mm_len",
+)
+
+//default dictionary with type
+error_dict = defaultdict(lambda: {"error_types": set(), "relevantID3DHP": "N/A"})
+
+
+//arcgis api for python query a layer
+flowline_lyr = FeatureLayer(flowline_url)
+results = flowline_lyr.query(where="name in ('test1', 'test2')", out_fields="name, age", return_geometry=True, out_sr=3857, as_df=True)

@@ -1,0 +1,46 @@
+//How to use
+in windows search enter ubuntu to open it
+//Navigate to folders on windows system
+cd /mnt/c (c drive)
+cd /mtd/d (d drive)
+ls -la (I see my project folders in d drive)
+
+//use WSL in visual studio code
+install wsl: Open Extension -> search for WSL and install it
+
+Ctrl Shift P to open the command or click on the search selelct show and run cmd
+type wsl -> connect to wsl
+File -> Open Folder then type the path to project. Example 
+
+//From windows File System open WSL
+Open File Explorer - Type wsl$
+
+//Note: it is better to create project folders in /home/nphan directory
+These folders can be accessed using File explorer -> type \\wsl$ in the address bar
+
+//to access C drive users folders
+cd /mnt/c/Users
+
+//install docker on WSL
+sudo apt update && sudo apt -y upgrade && sudo apt install -y docker.io
+The Docker daemon doesn’t start automatically. It can be started with this command:
+sudo dockerd > /dev/null 2>&1 &
+
+//Troubleshooting
+Q: I did all the things and I still can’t connect to the internet from the office or VPN from WSL2.
+Some WSL2 power users may have changed an important setting on their WSL2 instance prior to the USGS Enterprise solution having been devised, which is the most common cause of this behavior. Namely, when the firewall and the VPN routing table aren’t adjusted, the easiest way to get internet to WSL2 is to disable the automatic generation of /etc/resolv.conf, and statically assigning a public DNS nameserver. The simplest way to correct this is to delete /etc/wsl.conf from the WSL instance and reboot the host computer.
+ 
+
+ 
+
+Q: wsl --install didn’t work as expected. Is there another way to install WSL?
+Please see the Microsoft link below for manual instructions on enabling WSL, the virtual machine platform, and the Linux kernel.
+https://learn.microsoft.com/en-us/windows/wsl/install-manual 
+ 
+
+Q: New features in WSL aren't working, including mirrored networking mode
+
+These new features only work on Windows 11. If the computer is on Windows 11, it is possible that wsl --install or wsl --upgrade were run as an admin user, and thus the WSL UWP app is exclusively installed to the admin user and not the target user. This can be found with the powershell command: Get-AppxPackage -AllUsers "MicrosoftCorporationII.WindowsSubsystemForLinux" . 
+If this is the case, WSL UWP can be uninstalled with the command: Get-AppxPackage -AllUsers "MicrosoftCorporationII.WindowsSubsystemForLinux" | Remove-AppxPackage -AllUsers
+
+
